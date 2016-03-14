@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Hello World!</title>
+	<style>
+      html, body, * {
+        background: transparent;
+      }
+	  
+	#canvas {
+		cursor: crosshair;
+		position: absolute;
+		top:0;
+		left: 0;
+	}
+	  
+    </style>
+  </head>
+  <body>
+  <canvas id="canvas" width="0" height="0"></canvas>
+  
+  <script>
+	function getParameterByName(name, url) {
+		if (!url) url = window.location.href;
+		url = url.toLowerCase(); // This is just to avoid case sensitiveness  
+		name = name.replace(/[\[\]]/g, "\\$&").toLowerCase();// This is just to avoid case sensitiveness for query parameter name
+		var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+			results = regex.exec(url);
+		if (!results) return null;
+		if (!results[2]) return '';
+		return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}
+  
+	window.onload = function(){
+		const ipcRenderer = require('electron').ipcRenderer;
+		var screenshot = require("screenshot");
+		var remote = require('remote'); 		
+		
+	
+		
+		var c = document.getElementById('canvas');
+
+		var ctx =  c.getContext("2d");
+		
+		c.width = screen.width;
+		c.height = screen.height;
+		
+		var startingLocation = {}
+		var endingLocation = {}
+		
+		var mouseDown = false;
+		c.addEventListener("mousedown", function(e){
+			startingLocation = {x: e.pageX, y: e.pageY};
+			mouseDown = true;			
+		});
+		
+		c.addEventListener("mousemove", function(e){
+			if(mouseDown){
+				endingLocation = {x: e.pageX, y: e.pageY};
+				c.redrawImage();
+				ctx.beginPath();
+				ctx.strokeStyle="#FF0000";
+				ctx.rect(startingLocation.x,startingLocation.y,endingLocation.x - startingLocation.x,endingLocation.y - startingLocation.y);
+				ctx.stroke();
+			}
+		});
+		
+		c.addEventListener("mouseup", function(e){
+			mouseDown = false;
+			console.log(startingLocation);
+			console.log(endingLocation);
+			var startingPoint;
+			var endingPoint;
+			
+			if(startingLocation.x < endingLocation.x){
+				startingPoint = {
+					x: startingLocation.x,
+					y: startingLocation.y
+				}			
+				
+				endingPoint = {
+					x: endingLocation.x,
+					y: endingLocation.y
+				}
+			
+			}
+			else{
+				endingPoint = {
+					x: startingLocation.x,
+					y: startingLocation.y
+				}
+				
+				startingPoint = {
+					x: endingLocation.x,
+					y: endingLocation.y
+				}
+			}
+			
+			
+			var toSend = {
+				startingPoint: startingPoint,
+				endingPoint: endingPoint,
+				monitor: getParameterByName("monitor")
+			}
+			ipcRenderer.send('crop', toSend);
+		});
+		
+		var desktopScreen = new Image();
+
+		//drawing of the test image - desktopScreen
+		desktopScreen.onload = function () {
+			//draw background image
+			ctx.drawImage(desktopScreen, 0, 0);
+			//draw a box over the top
+			ctx.fillStyle = "rgba(256, 256, 256, 0.5)";
+			ctx.fillRect(0, 0, desktopScreen.width, desktopScreen.height);
+			c.redrawImage = function(){			
+				ctx.drawImage(desktopScreen, 0, 0);
+				//draw a box over the top
+				ctx.fillStyle = "rgba(256, 256, 256, 0.5)";
+				ctx.fillRect(0, 0, desktopScreen.width, desktopScreen.height);
+			}
+
+		};
+
+		desktopScreen.src = __dirname + '/node_modules/screenshot/screenshot' + getParameterByName("monitor") + '.jpg';
+		
+	}
+  </script>
+  </body>
+</html>
