@@ -8,7 +8,7 @@ const globalShortcut = electron.globalShortcut;
 
 ipcMain.on('crop', function (event, args) {
     console.log(args);
-    Jimp.read(__dirname + "/../node_modules/screenshot/screenshot" + args.monitor + ".jpg", function (err, image) {
+    Jimp.read(__dirname + "/../images/screenshot" + args.monitor + ".jpg", function (err, image) {
 		var width = args.endingPoint.x - args.startingPoint.x;
 		var height = args.endingPoint.y - args.startingPoint.y;
         image.crop( args.startingPoint.x, args.startingPoint.y, width, height);

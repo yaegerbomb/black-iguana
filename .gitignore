@@ -1,2 +1,6 @@
-node_modules/
-screenshotCropped*
+!node_modules/
+node_modules/*
+!node_modules/screenshot/
+!node_modules/screenshot/*
+screenshotCropped.jpg
+screenshot*.jpg
