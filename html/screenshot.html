@@ -3,32 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <title>Upload</title>
-    <link rel="stylesheet" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+	<link rel="stylesheet" type="text/css" href="../css/bootstrap/bootstrap.min.css" />
 	<style>
-		.button-success {
-            background: rgb(28, 184, 65); /* this is a green */
-        }
 	</style>
 </head>
 <body>
-	<div class="pure-g">
-		<img src="screenshotCropped.jpg" />
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12">
+				<img src="../images/screenshotCropped.jpg" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<div class="pull-right">
+					<button id="cancelButton" class="btn btn-default">Cancel</button>
+					<button id="uploadButton" class="btn btn-success">Upload</button>
+				</div>
+			</div>
+		</div>	
 	</div>
-	<div class="pure-g">
-		<button id="cancelButton" class="pure-button pure-button-active">Cancel</button>
-		<button id="uploadButton" class="pure-button button-success pure-button-active">Upload</button>
-	</div>	
 	
 	<script>
 		const remote = require('remote'); 
 		const imgur = require("imgur");	
 		const clipboard = require('electron').clipboard;
 		
+		//attach upload button click event
 		document.getElementById("uploadButton").addEventListener("click", function(){
-			imgur.uploadFile("screenshotCropped.jpg")
+			imgur.uploadFile(__dirname + "/../images/screenshotCropped.jpg")
 				.then(function (json) {
-					console.log(json.data.link);
+					//copy url created by imgur service to clipboard for sharing purposes
 					clipboard.writeText(json.data.link);
+					
+					//TO DO: add correct notification setup for windows 8 - 8.1
 					new Notification('Title', {
 						body: 'Copied to clipboard'
 					});
@@ -41,6 +49,7 @@
 				});
 		});
 		
+		//attach cancel click event - close the window
 		document.getElementById("cancelButton").addEventListener("click", function(){			
 			var window = remote.getCurrentWindow();
 			window.close();

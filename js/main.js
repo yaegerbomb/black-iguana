@@ -3,15 +3,15 @@
 const electron = require('electron');
 const ipcMain = require('electron').ipcMain;
 const Jimp = require("jimp");
-var screenshot = require("screenshot");
+const screenshot = require("screenshot");
 
 ipcMain.on('crop', function (event, args) {
-    console.log(args);  // prints "ping"
-    Jimp.read(__dirname + "/node_modules/screenshot/screenshot" + args.monitor + ".jpg", function (err, image) {
+    console.log(args);
+    Jimp.read(__dirname + "/../node_modules/screenshot/screenshot" + args.monitor + ".jpg", function (err, image) {
 		var width = args.endingPoint.x - args.startingPoint.x;
 		var height = args.endingPoint.y - args.startingPoint.y;
         image.crop( args.startingPoint.x, args.startingPoint.y, width, height);
-		image.write( "screenshotCropped.jpg", function(){
+		image.write(__dirname + "/../images/screenshotCropped.jpg", function(){
 			console.log("cropped");
 			
 			for(var i = 0; i <  mainWindow.length; i++){
@@ -22,7 +22,7 @@ ipcMain.on('crop', function (event, args) {
 			}
 			
 			mainWindow = [];
-			Jimp.read("screenshotCropped.jpg", function (err, croppedimage) {
+			Jimp.read(__dirname + "/../images/screenshotCropped.jpg", function (err, croppedimage) {
 				croppedimage.width = width;
 				croppedimage.height = height;
 				
@@ -37,8 +37,7 @@ ipcMain.on('crop', function (event, args) {
 						mainWindow.push(new BrowserWindow({minWidth: croppedimage.width + 50, minHeight: croppedimage.height + 150, x: displays[i].bounds.x, 
 											y: displays[i].bounds.y, useContentSize: true, center: true, frame: true }));
 
-						// and load the index.html of the app.
-						mainWindow[mainWindow.length - 1].loadURL('file://' + __dirname + '/screenshot.html');
+						mainWindow[mainWindow.length - 1].loadURL('file://' + __dirname + '/../html/screenshot.html');
 					}
 				}
 			});
@@ -81,6 +80,6 @@ app.on('ready', function () {
         mainWindow.push(new BrowserWindow({ x: displays[i].bounds.x, y: displays[i].bounds.y, fullscreen: true, transparent: true, frame: false }));
 
         // and load the index.html of the app.
-        mainWindow[mainWindow.length - 1].loadURL('file://' + __dirname + '/index.html?monitor=' + i);
+        mainWindow[mainWindow.length - 1].loadURL('file://' + __dirname + '/../html/index.html?monitor=' + i);
     }
 });
