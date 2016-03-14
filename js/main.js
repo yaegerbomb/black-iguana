@@ -4,6 +4,7 @@ const electron = require('electron');
 const ipcMain = require('electron').ipcMain;
 const Jimp = require("jimp");
 const screenshot = require("screenshot");
+const globalShortcut = electron.globalShortcut;
 
 ipcMain.on('crop', function (event, args) {
     console.log(args);
@@ -72,14 +73,31 @@ app.on('window-all-closed', function () {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.on('ready', function () {
-	screenshot.snap();
-    var displays = electron.screen.getAllDisplays();
-    for (var i in displays) {
+	var init = globalShortcut.register('Ctrl+Shift+4', function() {	
+		screenshot.snap();
+		var displays = electron.screen.getAllDisplays();
+		for (var i in displays) {
 
-        // Create the browser window with the size of the desktop screen  
-        mainWindow.push(new BrowserWindow({ x: displays[i].bounds.x, y: displays[i].bounds.y, fullscreen: true, transparent: true, frame: false }));
+			// Create the browser window with the size of the desktop screen  
+			mainWindow.push(new BrowserWindow({ x: displays[i].bounds.x, y: displays[i].bounds.y, fullscreen: true, transparent: true, frame: false }));
 
-        // and load the index.html of the app.
-        mainWindow[mainWindow.length - 1].loadURL('file://' + __dirname + '/../html/index.html?monitor=' + i);
-    }
+			// and load the index.html of the app.
+			mainWindow[mainWindow.length - 1].loadURL('file://' + __dirname + '/../html/index.html?monitor=' + i);
+		}	
+	});
+	
+	if (!init) {
+		console.log('registration init failed');
+	}
+
+	// Check whether a shortcut is registered.
+	console.log(globalShortcut.isRegistered('Ctrl+Shift+4'));
+});
+
+app.on('will-quit', function() {
+	// Unregister a shortcut.
+	globalShortcut.unregister('Ctrl+Shift+4');
+
+	// Unregister all shortcuts.
+	globalShortcut.unregisterAll();
 });
